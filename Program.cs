@@ -6,88 +6,66 @@ class Program
     static private Dictionary<char, long> TheLetters = new Dictionary<char, long>();
     static private Dictionary<string, long> TheAnswers = new Dictionary<string, long>();
 
-    private delegate long Calculate(long val);
-
-    //static private long Ac24(long val) => TheLetters['b'] + val;
-    //static private long Dn23(long val) => val - TheLetters['Y'];
-    //static private long dn07(long val) => val * val * val;
-
     static void Main(string[] args)
     {
-
         // -------------------------------------------------------------------------------------
-        // -- dn07 : YYY (5)
-
-        var poss_Y2 = func("dn07", 5, 'Y', 2, val=>val*val*val);
-
-        // -------------------------------------------------------------------------------------
-        // -- ac07 : b + b (2)
-        {
-            var poss_b = new List<Letter>();
-
-            foreach (var b in TheCubes.UnusedOfLength(1))
-            {
-                var val = b + b;
-
-                if (val > 9 && val < 100 && DigitAtPos(val, 0) == DigitAtPos(TheAnswers["dn07"], 0))
-                {
-                    poss_b.Add(new Letter('b', b));
-                }
-            }
-            if (poss_b.Count == 1)
-            {
-                foreach (var b in poss_b)
-                {
-                    TheAnswers.Add("ac07", b.Value + b.Value);
-                    TheLetters.Add('b', b.Value);
-                    TheCubes.MarkAsUsed(b.Value);
-                }
-            }
-        }
-
-        // -------------------------------------------------------------------------------------
-        // -- ac24 : b + J (2)
-
-        var poss_J2 = func("ac24", 2, 'J', 2, val => TheLetters['b'] + val);
-
-        // -------------------------------------------------------------------------------------
-        // -- dn23 : U - Y (2)
-
-        var poss_U2 = func(clue: "dn23", 2, letter: 'U', cubeLength: 3, val => val - TheLetters['Y']);
-
+        // -- These are all easily determined - they need solving in this order
         // -------------------------------------------------------------------------------------
 
-        foreach (var l in TheLetters)
-        {
-            Console.WriteLine($"{l.Key} - {l.Value,5}");
-        }
-        Console.WriteLine();
-        foreach (var a in TheAnswers)
+        func(clue: "dn07", cluelength: 5, letter: 'Y', calculate: Y => Y * Y * Y);
+        func(clue: "ac07", cluelength: 2, letter: 'b', calculate: b => b + b, val => DigitAtPos(val, 0), DigitAtPos(TheAnswers["dn07"], 0));
+        func(clue: "ac24", cluelength: 2, letter: 'J', calculate: J => TheLetters['b'] + J);
+        func(clue: "dn23", cluelength: 2, letter: 'U', calculate: U => U - TheLetters['Y']);
+
+        TheAnswers.Add("dn02", TheLetters['U'] - TheLetters['b']);
+        TheAnswers.Add("ac15", TheLetters['b'] + 2 * TheLetters['U'] + TheLetters['Y']);
+
+        func(clue: "dn16", cluelength: 4, letter: 'i', calculate: i => i + TheLetters['J'], val => DigitAtPos(val, 0), DigitAtPos(TheAnswers["ac15"], 2));
+        func(clue: "ac12", cluelength: 4, letter: 'E', calculate: E => TheLetters['i'] + TheLetters['J'] - E * 2, val => DigitAtPos(val, 3), DigitAtPos(TheAnswers["dn07"], 2));
+        var dn18 = func(clue: "dn18", cluelength: 4, letter: 'B', calculate: B => B + TheLetters['J'] * 2 - TheLetters['E']);
+
+        var dn06 = func(clue: "dn06", cluelength: 4, letter: 'L', calculate: L => TheLetters['E'] + L, val => DigitAtPos(val, 2), DigitAtPos(TheAnswers["ac12"], 2));
+        var ac22 = func(clue: "ac22", cluelength: 4, letter: 'y', calculate: y => TheLetters['U'] * 2 + y - TheLetters['E'], val=>DigitAtPos(val,2), DigitAtPos(TheAnswers["dn16"],2));
+
+        // -------------------------------------------------------------------------------------
+        //var ac09 = func(clue: "ac09", cluelength: 4, letter: 'N', calculate: v => TheLetters['I'] + v, val => DigitAtPos(val, 1), DigitAtPos(TheAnswers["dn02"], 2));
+        // -------------------------------------------------------------------------------------
+
+        foreach (var a in TheAnswers.OrderBy(z => z.Key))
         {
             Console.WriteLine($"{a.Key} - {a.Value,5}");
         }
-
+        Console.WriteLine();
+        foreach (var l in TheLetters.OrderBy(z => z.Key))
+        {
+            Console.WriteLine($"{l.Key} - {l.Value,5}");
+        }
     }
-    static private List<Letter> func(string clue, int cluelength, char letter, int cubeLength, Func<long, long> calc)
+
+    // -------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------
+
+    static private List<Letter> func(string clue, int cluelength, char letter, Func<long, long> calculate, Func<long, int> thisDigit, int otherDigit)
     {
         var possibles = new List<Letter>();
 
-        foreach (var U in TheCubes.UnusedOfLength(cubeLength))
+        foreach (var cube in TheCubes.Unused)
         {
-            var val = calc(U);
-            if (
-                (cluelength == 2 && val > 9 && val < 100) ||
+            var val = calculate(cube);
+            if ((cluelength == 2 && val > 9 && val < 100) ||
                 (cluelength == 3 && val > 99 && val < 1000) ||
                 (cluelength == 4 && val > 999 && val < 10000) ||
-                (cluelength == 5 && val > 9999 && val < 100000)
-                )
-                possibles.Add(new Letter(letter, U));
+                (cluelength == 5 && val > 9999 && val < 100000))
+            {
+                if (thisDigit(val) == otherDigit)
+                    possibles.Add(new Letter(letter, cube));
+            }
         }
         if (possibles.Count == 1)
         {
             foreach (var U in possibles)
             {
-                TheAnswers.Add(clue, calc(U.Value));
+                TheAnswers.Add(clue, calculate(U.Value));
                 TheLetters.Add(letter, U.Value);
                 TheCubes.MarkAsUsed(U.Value);
             }
@@ -95,12 +73,33 @@ class Program
         return possibles;
     }
 
-    static private long Root(long n)
+    // -------------------------------------------------------------------------------------
+
+    static private List<Letter> func(string clue, int cluelength, char letter, Func<long, long> calculate)
     {
-        return (long)(Math.Pow(n, 1.0 / 3.0) + 0.0001);
+        var possibles = new List<Letter>();
+
+        foreach (var cube in TheCubes.Unused)
+        {
+            var val = calculate(cube);
+            if ((cluelength == 2 && val > 9 && val < 100) ||
+                (cluelength == 3 && val > 99 && val < 1000) ||
+                (cluelength == 4 && val > 999 && val < 10000) ||
+                (cluelength == 5 && val > 9999 && val < 100000))
+                possibles.Add(new Letter(letter, cube));
+        }
+        if (possibles.Count == 1)
+        {
+            foreach (var U in possibles)
+            {
+                TheAnswers.Add(clue, calculate(U.Value));
+                TheLetters.Add(letter, U.Value);
+                TheCubes.MarkAsUsed(U.Value);
+            }
+        }
+        return possibles;
     }
-    static private int DigitAtPos(long val, int pos)
-    {
-        return int.Parse(val.ToString()[pos].ToString());
-    }
+    // -------------------------------------------------------------------------------------
+
+    static private int DigitAtPos(long val, int pos) => int.Parse(val.ToString()[pos].ToString());
 }

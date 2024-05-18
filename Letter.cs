@@ -10,6 +10,10 @@
 			Name = n;
 			Value = val;
 		}
+        public override string ToString()
+        {
+            return $"[{Name},{Value}]";
+        }
     }
 }
 
