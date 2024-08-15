@@ -15,15 +15,14 @@ namespace L4816
             ClueName = clue;
             ClueLength = cluelength;
             Formula1 = formula;
+            Formula2 = (aa, bb) => aa + bb; // this is a stub
         }
         public Clue(string clue, int cluelength, Func<long, long, long> formula)
         {
             ClueName = clue;
             ClueLength = cluelength;
+            Formula1 = aa => aa;            // this is a stub
             Formula2 = formula;
         }
-
-        // -------------------------------------------------------------------------------------
-
     }
 }
