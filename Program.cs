@@ -1,8 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-
-namespace L4816;
-
-class Program
+﻿class Program
 {
     static private Cubes CubeList = new Cubes();
     static private Dictionary<char, long> Lett = new Dictionary<char, long>();
@@ -20,15 +16,13 @@ class Program
         CalcOneLetter(new Clue("dn07", 5, Y => (Y * Y * Y)), 'Y');
 
         // -- ac07
-        template = $"{CharAtPos("dn07", 0)}";
+        template = $"{ChAtPos("dn07", 0)}";
         CalcOneLetter(new Clue("ac07", 2, b => b + b), 'b', template);
 
         // -- ac24
-        //var ac24 = new Clue("ac24", 2, J => Lett['b'] + J);
         CalcOneLetter(new Clue("ac24", 2, J => Lett['b'] + J), 'J');
 
         // -- dn23
-        //var dn23 = new Clue("dn23", 2, U => U - Lett['Y']);
         CalcOneLetter(new Clue("dn23", 2, U => U - Lett['Y']), 'U');
 
         // -- ac15
@@ -38,37 +32,36 @@ class Program
         Answ.Add("dn02", Lett['U'] - Lett['b']);
 
         // -- dn16
-        template = $"{CharAtPos("ac15", 2)}";
-        //var dn16 = new Clue("dn16", 4, i => i + Lett['J']);
+        template = $"{ChAtPos("ac15", 2)}";
         CalcOneLetter(new Clue("dn16", 4, i => i + Lett['J']), 'i', template);
 
         // -- ac12
-        template = $"...{CharAtPos("dn07", 2)}";
-        //var ac12 = new Clue("ac12", 4, E => Lett['i'] + Lett['J'] - E - E);
+        template = $"...{ChAtPos("dn07", 2)}";
         CalcOneLetter(new Clue("ac12", 4, E => Lett['i'] + Lett['J'] - E - E), 'E', template);
 
         // -------------------------------------------------------------------------------------
         // -- Let's have a look at dn06 and dn09 which will give us L and t
 
         // -- dn06
-        template = $"..{CharAtPos("ac12", 2)}-";
-        var dn06a = CalcOneLetter(new Clue("dn06", 4, L => Lett['E'] + L), 'L', template);
+        template = $"..{ChAtPos("ac12", 2)}-";
+        var dn06Poss = CalcOneLetter(new Clue("dn06", 4, L => Lett['E'] + L), 'L', template);
 
-        // -- dn09
-        template = $"...{CharAtPos("ac15", 0)}..{CharAtPos("ac24", 0)}";
-        foreach (var L in dn06a)
+        template = $"...{ChAtPos("ac15", 0)}..{ChAtPos("ac24", 0)}";
+        foreach (var L in dn06Poss)
         {
-            if (CalcOneLetter(new Clue("dn09", 7, t => Lett['E'] * t + Lett['E'] + L.Item1.Value), 't', template).Count == 1)
+            var letter = L.Item1;
+            var entry = L.Item2;
+            if (CalcOneLetter(new Clue("dn09", 7, t => Lett['E'] * t + Lett['E'] + letter.Value), 't', template).Count == 1)
             {
-                Answ.Add("dn06", L.Item2);
-                Lett.Add(L.Item1.Name, L.Item1.Value);
-                CubeList.MarkAsUsed(L.Item1.Value);
+                Answ.Add("dn06", entry);
+                Lett.Add(letter.Name, letter.Value);
+                CubeList.MarkAsUsed(letter.Value);
                 break;
             }
         }
 
         // -- ac22
-        template = $"{CharAtPos("dn09", 5)}.{CharAtPos("dn16", 2)}";
+        template = $"{ChAtPos("dn09", 5)}.{ChAtPos("dn16", 2)}";
         CalcOneLetter(new Clue("ac22", 4, y => Lett['U'] + Lett['U'] + y - Lett['E']), 'y', template);
 
         // -------------------------------------------------------------------------------------
@@ -76,11 +69,11 @@ class Program
         // -------------------------------------------------------------------------------------
         {
             // -- ac09
-            template = $"{CharAtPos("dn09", 0)}{CharAtPos("dn02", 1)}";
+            template = $"{ChAtPos("dn09", 0)}{ChAtPos("dn02", 1)}";
             var ac09 = CalcTwoLetters(new Clue("ac09", 4, (I, N) => I + N), 'I', 'N', template);
 
             // -- dn05
-            template = $"..{CharAtPos("ac12", 1)}";
+            template = $"..{ChAtPos("ac12", 1)}";
             var dn05 = CalcTwoLetters(new Clue("dn05", 6, (N, s) => N * s - Lett['J']), 'N', 's', template);
 
             // -- N appears in both of these - cross check to find a matching value
@@ -129,72 +122,66 @@ class Program
         Answ.Add("ac13", Lett['i'] + Lett['s'] + Lett['s'] - Lett['N']);
 
         // -- dn04
-        template = $".{CharAtPos("ac09", 3)}";
+        template = $".{ChAtPos("ac09", 3)}";
         CalcOneLetter(new Clue("dn04", 2, T => Lett['s'] + Lett['s'] - T), 'T', template);
 
         // -- ac01
-        template = $".{CharAtPos("dn02", 0)}.{CharAtPos("dn04", 0)}";
+        template = $".{ChAtPos("dn02", 0)}.{ChAtPos("dn04", 0)}";
         CalcOneLetter(new Clue("ac01", 5, W => Lett['T'] + Lett['T'] + W + Lett['y']), 'W', template);
 
         // -- ac10
-        template = $"{CharAtPos("dn05", 1)}{CharAtPos("dn06", 1)}{CharAtPos("dn07", 1)}";
+        template = $"{ChAtPos("dn05", 1)}{ChAtPos("dn06", 1)}{ChAtPos("dn07", 1)}";
         CalcOneLetter(new Clue("ac10", 4, S => Lett['E'] + S + Lett['T'] + Lett['T']), 'S', template);
 
         // -- ac20
         Answ.Add("ac20", Lett['S'] - Lett['U']);
 
         // -- dn03
-        template = $"{CharAtPos("ac01", 2)}{CharAtPos("ac09", 2)}.{CharAtPos("ac13", 1)}";
+        template = $"{ChAtPos("ac01", 2)}{ChAtPos("ac09", 2)}.{ChAtPos("ac13", 1)}";
         CalcTwoLetters(new Clue("dn03", 4, (R, O) => R - O), 'R', 'O', template);
 
         // -- ac11
-        template = $"{CharAtPos("dn09", 1)}{CharAtPos("dn02", 2)}{CharAtPos("dn03", 2)}";
+        template = $"{ChAtPos("dn09", 1)}{ChAtPos("dn02", 2)}{ChAtPos("dn03", 2)}";
         CalcTwoLetters(new Clue("ac11", 3, (D, o) => D - o - o - Lett['Y']), 'D', 'o', template);
 
         // -- ac25
         Answ.Add("ac25", Lett['D'] - Lett['S'] - Lett['Y']);
 
         // -- dn13
-        template = $"{CharAtPos("ac13", 0)}{CharAtPos("ac15", 1)}.{CharAtPos("ac22", 1)}"
-            + $"{CharAtPos("ac24", 1)}";
+        template = $"{ChAtPos("ac13", 0)}{ChAtPos("ac15", 1)}.{ChAtPos("ac22", 1)}{ChAtPos("ac24", 1)}";
         CalcTwoLetters(new Clue("dn13", 5, (e, B) => Lett['J'] * Lett['J'] + e + B), 'e', 'B', template);
 
         // -- dn18
-        template = $".{CharAtPos("ac20", 0)}";
+        template = $".{ChAtPos("ac20", 0)}";
         CalcOneLetter(new Clue("dn18", 4, B => B + Lett['J'] + Lett['J'] - Lett['E']), 'B', template);
 
         // -- ac17
-        template = $".{CharAtPos("dn05", 4)}.{CharAtPos("dn07", 4)}";
+        template = $".{ChAtPos("dn05", 4)}.{ChAtPos("dn07", 4)}";
         CalcOneLetter(new Clue("ac17", 4, l => Lett['B'] - l - l - Lett['s']), 'l', template);
 
         // -- ac19
-        template = $"{CharAtPos("dn13", 2)}{CharAtPos("dn16", 1)}.{CharAtPos("dn05", 5)}";
+        template = $"{ChAtPos("dn13", 2)}{ChAtPos("dn16", 1)}.{ChAtPos("dn05", 5)}";
         CalcOneLetter(new Clue("ac19", 4, H => H - Lett['E'] - Lett['l']), 'H', template);
 
         // -- dn08
-        template = $"{CharAtPos("ac07", 1)}{CharAtPos("ac10", 3)}...{CharAtPos("ac20", 2)}";
+        template = $"{ChAtPos("ac07", 1)}{ChAtPos("ac10", 3)}...{ChAtPos("ac20", 2)}";
         CalcOneLetter(new Clue("dn08", 7, P => Lett['B'] * P + Lett['o'] + Lett['o']), 'P', template);
 
         // -- dn21
         Answ.Add("dn21", Lett['P'] + Lett['T'] - Lett['s']);
 
-        {
-            template = $"{CharAtPos("dn06", 3)}{CharAtPos("dn07", 3)}";
-            var ac14 = new Clue("ac14", 3, (d, e) => d - e - e - Lett['P']);
-            var (ac14a, ac14b) = CalcTwoLetters(ac14, 'd', 'e', template);
-        }
-        {
-            template = $"{CharAtPos("dn23", 0)}{CharAtPos("dn18", 2)}{CharAtPos("dn21", 1)}"
-                + $"{CharAtPos("dn08", 6)}";
-            var ac23 = new Clue("ac23", 4, (A, G) => A - G - G);
-            var (ac23a, ac23b) = CalcTwoLetters(ac23, 'A', 'G', template);
-        }
-        {
-            template = $"{CharAtPos("ac12", 0)}{CharAtPos("ac13", 2)}{CharAtPos("ac17", 0)}"
-                + $"{CharAtPos("ac19", 2)}{CharAtPos("ac22", 3)}{CharAtPos("ac25", 0)}";
-            var dn12 = new Clue("dn12", 6, F => Lett['b'] * F + F + Lett['S']);
-            var dn12a = CalcOneLetter(dn12, 'F', template);
-        }
+        // -- dn06
+        template = $"{ChAtPos("dn06", 3)}{ChAtPos("dn07", 3)}";
+        CalcTwoLetters(new Clue("ac14", 3, (d, e) => d - e - e - Lett['P']), 'd', 'e', template);
+
+        // -- dn21
+        template = $"{ChAtPos("dn23", 0)}{ChAtPos("dn18", 2)}{ChAtPos("dn21", 1)}{ChAtPos("dn08", 6)}";
+        CalcTwoLetters(new Clue("ac23", 4, (A, G) => A - G - G), 'A', 'G', template);
+
+        // -- ac12
+        template = $"{ChAtPos("ac12", 0)}{ChAtPos("ac13", 2)}{ChAtPos("ac17", 0)}{ChAtPos("ac19", 2)}{ChAtPos("ac22", 3)}{ChAtPos("ac25", 0)}";
+        CalcOneLetter(new Clue("dn12", 6, F => Lett['b'] * F + F + Lett['S']), 'F', template);
+
         // -------------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------------
@@ -256,7 +243,8 @@ class Program
         }
         if (possibles.Count == 1)
         {
-            foreach (var poss in possibles)
+            //            foreach (var poss in possibles)
+            var poss = possibles.FirstOrDefault();
             {
                 Answ.Add(clue.ClueName, poss.Item2);
                 Lett.Add(letter, poss.Item1.Value);
@@ -307,12 +295,14 @@ class Program
         if (poss1.Count == 1)
         {
             Answ.Add(clue.ClueName, poss1[0].Item2);
-            foreach (var poss in poss1)
+            //            foreach (var poss in poss1)
+            var poss = poss1.FirstOrDefault();
             {
                 Lett.Add(letter1, poss.Item1.Value);
                 CubeList.MarkAsUsed(poss.Item1.Value);
             }
-            foreach (var poss in poss2)
+            //            foreach (var poss in poss2)
+            poss = poss2.FirstOrDefault();
             {
                 Lett.Add(letter2, poss.Item1.Value);
                 CubeList.MarkAsUsed(poss.Item1.Value);
@@ -345,5 +335,5 @@ class Program
     }
     static private int DigitAtPos(long val, int pos) => int.Parse(val.ToString()[pos].ToString());
 
-    static private char CharAtPos(string ans, int pos) => Answ[ans].ToString()[pos];
+    static private char ChAtPos(string ans, int pos) => Answ[ans].ToString()[pos];
 }
